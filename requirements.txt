@@ -1,11 +1,9 @@
-
+streamlit
 numpy
 pandas
-scikit-learn
 matplotlib
-tensorflow
-streamlit
-joblib
+torch
 xarray
 netCDF4
 h5netcdf
+requests
