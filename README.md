@@ -2,95 +2,148 @@
 
 ## Satellite Embedding-Based Deep Learning Framework for Reconstruction of Subsurface Ocean Temperature
 
-OceanEmbed is a deep-learning prototype for reconstructing subsurface ocean temperature profiles from multi-source ocean surface observations.
+OceanEmbed is a deep-learning prototype designed to estimate subsurface ocean temperature profiles from multi-source ocean surface observations. It combines surface ocean variables with spatial and temporal deep-learning features to reconstruct temperature at multiple depths.
+
+**Live Dashboard:** [OceanEmbed Explorer](https://oceanembed-jyjavxv7yvenk9s4brb63m.streamlit.app/)
+
+---
 
 ## 🎯 Objective
 
-Estimate ocean temperature at multiple subsurface depths using surface ocean variables.
+To develop a data-driven framework that estimates subsurface ocean temperature at multiple depth levels using surface ocean observations.
 
-## 🌐 Prototype Region
+The project aims to explore how spatial patterns and temporal changes in surface conditions can support subsurface temperature reconstruction.
+
+## 🌍 Prototype Region
 
 North Indian Ocean / Bay of Bengal prototype.
 
-- Latitude: 10–12°N
-- Longitude: 88–90°E
-- Grid resolution: 0.25°
+The current dashboard operates on the uploaded OceanEmbed NetCDF dataset. Geographic coverage and prediction availability depend on the selected dataset.
 
-## 📥 Input Variables
+## 🚀 Key Features
 
-The prototype uses 7 surface variables:
+- PyTorch-based subsurface temperature reconstruction.
+- Seven surface input variables.
+- Seven consecutive daily input frames.
+- Predictions at 15 depth levels.
+- Interactive date and geographic location selection.
+- Temperature-depth profile visualization.
+- Spatial temperature prediction maps.
+- CSV export of predicted temperature profiles.
+- Compact learned representation with a 128-dimensional embedding.
 
-1. SST — Sea Surface Temperature
-2. SSS — Sea Surface Salinity
-3. SLA — Sea Level Anomaly
-4. U Current
-5. V Current
-6. U Wind
-7. V Wind
+## 🛰️ Input Variables
 
-## 🎯 Target Depths
+The model uses seven surface variables:
 
-0, 5, 10, 20, 30, 50, 75, 100, 125, 150, 200, 300, 500, 700 and 1000 m.
+| Variable | Description |
+|---|---|
+| SST | Sea Surface Temperature |
+| SSS | Sea Surface Salinity |
+| SLA | Sea Level Anomaly |
+| UO | Eastward Surface Current |
+| VO | Northward Surface Current |
+| Uwind | Eastward Wind Component |
+| Vwind | Northward Wind Component |
 
-GLORYS is used as the reference temperature dataset.
+The model consumes seven consecutive daily frames of these variables.
+
+## 🌡️ Prediction Depths
+
+The model generates estimates at 15 depth levels:
+
+`0, 5, 10, 20, 30, 50, 75, 100, 125, 150, 200, 300, 500, 700, 1000 m`
+
+These values represent the output levels configured for the current prototype.
 
 ## 🧠 Model Architecture
 
-Surface Ocean Variables  
-↓  
-3×3 Spatial Patch  
-↓  
-CNN Feature Extraction  
-↓  
-128-D Ocean Embedding  
-↓  
-Dense Decoder  
-↓  
-15-Level Temperature Profile
+OceanEmbed uses a PyTorch neural network with convolutional residual feature extraction, temporal attention and spatial decoding.
 
-## 📊 Prototype Results
+The model processes a seven-day sequence of seven surface variables and produces a subsurface temperature estimate for each configured depth.
 
-### OceanEmbed CNN
+**Architecture overview:**
 
-- RMSE: 2.043 °C
-- MAE: 0.979 °C
-- R²: 0.918
+1. Surface-variable input preparation.
+2. Normalization using saved training statistics.
+3. Spatial feature extraction through convolutional residual blocks.
+4. Temporal feature integration.
+5. Spatial decoding.
+6. Reconstruction of temperatures at 15 depth levels.
+7. Conversion of normalized predictions back to temperature units.
 
-### MLP Baseline
+The trained checkpoint is `oceanembed_best.pth`.
 
-- RMSE: 1.374 °C
-- MAE: 1.110 °C
-- R²: 0.962
+## 📊 Evaluation Results
 
-These results are from a small one-day PoC dataset and should not be interpreted as final scientific validation.
+The following results are from the project's previously recorded evaluation reports.
+
+| Metric | 2020 Validation | 2021 Test |
+|---|---:|---:|
+| Pooled RMSE | 1.406 °C | 1.736 °C |
+| Pooled MAE | 1.010 °C | 1.280 °C |
+| Pooled Bias | -0.041 °C | -0.253 °C |
+
+### Interpretation
+
+The recorded pooled RMSE was approximately 1.41 °C on the 2020 validation set and 1.74 °C on the 2021 test set.
+
+Performance varies by depth. Some intermediate and deeper levels show weak predictive skill, so the pooled metrics should not be interpreted as uniform accuracy at every depth.
+
+These values are historical evaluation results; they are not a guarantee of accuracy for every dashboard prediction.
 
 ## 📈 Visualizations
 
-The project includes:
+The repository includes the following figures:
 
-- Depth-wise RMSE
-- Model comparison
-- Actual vs predicted temperature profile
-- Surface prediction map
-- Prototype uncertainty map
-- Ocean Embedding visualization
+- `figures/OceanEmbed_depthwise_RMSE.png`
+- `figures/OceanEmbed_embedding_PCA.png`
+- `figures/OceanEmbed_surface_prediction_map.png`
+- `figures/OceanEmbed_uncertainty_map.png`
+- `figures/actual_vs_predicted_profile.png`
+- `figures/model_comparison_R2.png`
+- `figures/model_comparison_RMSE.png`
 
-## 🖥️ Streamlit Explorer
+The provenance and consistency of these figures with the current PyTorch model should be verified before interpreting them as current model results.
 
-A prototype Streamlit interface is provided in `app/streamlit_app.py`.
+## 🖥️ Interactive Dashboard
 
-It accepts surface ocean variables and reconstructs a 15-depth temperature profile.
+Open the deployed application:
 
-## 📁 Project Structure
+**[Launch OceanEmbed Explorer](https://oceanembed-jyjavxv7yvenk9s4brb63m.streamlit.app/)**
+
+### Dashboard workflow
+
+1. Upload the trained PyTorch checkpoint.
+2. Upload `surface_normalization.npz`.
+3. Upload `target_temperature_stats.npz`.
+4. Upload a monthly OceanEmbed NetCDF file.
+5. Select a target date and geographic location.
+6. Run temperature reconstruction.
+7. Explore the temperature-depth profile and spatial prediction map.
+8. Download the predicted profile as a CSV file.
+
+The target date requires the preceding six daily frames.
+
+Uploaded files may need to be supplied again after the application session resets.
+
+## 📁 Repository Structure
 
 ```text
-OceanEmbed_GitHub/
+OceanEmbed/
 ├── README.md
-├── requirements.txt
-├── models/
-├── data/
-├── notebooks/
-├── src/
 ├── app/
 │   └── streamlit_app.py
-└── figures/
+├── figures/
+│   ├── OceanEmbed_depthwise_RMSE.png
+│   ├── OceanEmbed_embedding_PCA.png
+│   ├── OceanEmbed_surface_prediction_map.png
+│   ├── OceanEmbed_uncertainty_map.png
+│   ├── actual_vs_predicted_profile.png
+│   ├── model_comparison_R2.png
+│   └── model_comparison_RMSE.png
+├── models/
+│   ├── X_patch_scaler.pkl
+│   ├── Y_cnn_scaler.pkl
+│   └── oceanembed_cnn.keras
+└── requirements.txt
